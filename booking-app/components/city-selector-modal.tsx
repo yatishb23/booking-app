@@ -1,12 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { MapPin, Search } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn } from "@/lib/utils"
 
 const POPULAR_CITIES = [
   "Mumbai", "Delhi-NCR", "Bengaluru", "Hyderabad", 
@@ -23,22 +22,32 @@ const OTHER_CITIES = [
 
 interface CitySelectorModalProps {
   open: boolean
+  onOpenChange: (open: boolean) => void // Detect close
   onSelect: (city: string) => void
 }
 
-export function CitySelectorModal({ open, onSelect }: CitySelectorModalProps) {
+export function CitySelectorModal({ open, onOpenChange, onSelect }: CitySelectorModalProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCity, setSelectedCity] = useState("")
 
   const filteredCities = OTHER_CITIES.filter(city => 
     city.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  // ✅ Default city
+  useEffect(() => {
+    setSelectedCity("Mumbai")
+    onSelect("Mumbai") // pass to parent
+  }, [])
+
   const handleSelect = (city: string) => {
+    setSelectedCity(city)
     onSelect(city)
+    onOpenChange(false) // close modal after selection
   }
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden [&>button]:hidden">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-xl text-center">Select Your City</DialogTitle>

@@ -213,7 +213,7 @@ export default function BookingPage() {
                                </div>
                            )}
                            
-                           <div className="text-xs text-muted-foreground mt-4 flex items-start gap-2 bg-blue-50 dark:bg-blue-900/10 p-3 rounded text-blue-700 dark:text-blue-300">
+                           <div className="text-xs text-muted-foreground mt-4 flex items-start gap-2 bg-primary/10 dark:bg-primary/20 p-3 rounded text-primary">
                                <Info className="w-4 h-4 shrink-0 mt-0.5" />
                                <p>Seats are reserved for 5 minutes once selected. Please complete your transaction within this time.</p>
                            </div>

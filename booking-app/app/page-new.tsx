@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { EventList } from "@/components/event-list";
 import { LoadingState } from "@/components/loading-state";
 import { ErrorFallback } from "@/components/error-fallback";
 import { apiClient } from "@/lib/api";
 import Link from "next/link";
 import type { Event } from "@/lib/types";
+import { PageContainer } from "@/components/page-container";
 import { FeaturedCarousel } from "@/components/featured-carousel";
 import { CategorySection } from "@/components/category-section"; 
 
@@ -67,35 +67,33 @@ export default function Home() {
   const categoriesToShow = ['Movies', 'Music', 'Comedy', 'Sports', 'Arts', 'Activities', 'Technology'];
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <PageContainer fullWidth className="pb-0">
       
+      {/* Featured / Live Carousel */}
       {(!selectedCategory || selectedCategory === "All") &&
         !isLoading &&
         events.length > 0 && (
-          <div className="mb-4 bg-gradient-to-b from-primary/5 to-transparent pt-4 pb-8">
-             <FeaturedCarousel events={events.slice(0, 5)} />
+          <div className="w-full mb-8 bg-gradient-to-b from-muted to-background/50 pt-6 pb-10 border-b border-border/40">
+             <div className="container mx-auto px-4 md:px-6">
+                <FeaturedCarousel events={events.slice(0, 5)} />
+             </div>
           </div>
         )}
 
-      <main className="w-full">
+      <main className="container mx-auto px-4 md:px-6 py-8 space-y-12 min-h-[60vh]">
         {error ? (
-          <div className="max-w-[1400px] mx-auto px-6">
-            <ErrorFallback
+           <ErrorFallback
               title="Failed to load events"
               message={error}
               onRetry={() => window.location.reload()}
             />
-          </div>
         ) : isLoading ? (
-          <div className="max-w-[1400px] mx-auto px-6 py-12">
              <LoadingState count={8} />
-          </div>
         ) : (
-          <div className="flex flex-col gap-0">
-             {/* If a specific category is selected (and not 'All'), show just that, otherwise show all sections */}
+          <div className="space-y-16">
              {selectedCategory && selectedCategory !== 'All' ? (
                 <div className="min-h-[50vh]">
-                  <CategorySection 
+                   <CategorySection 
                       title={`${selectedCategory} Events`} 
                       events={eventsByCategory[selectedCategory] || []} 
                       className="py-8"
@@ -109,7 +107,7 @@ export default function Home() {
                   <CategorySection 
                       title="Recommended for You" 
                       events={events.slice(0, 8)} 
-                      viewAllLink="/events"
+                      viewAllLink="/search"
                   />
 
                   {/* Render Sections for each category */}
@@ -122,7 +120,8 @@ export default function Home() {
                           <CategorySection
                             title={category}
                             events={categoryEvents}
-                            background={index % 2 === 0 ? 'muted' : 'default'} // Alternate backgrounds
+                            viewAllLink={`/search?category=${encodeURIComponent(category)}`}
+                            background={index % 2 === 0 ? 'muted' : 'default'}
                           />
                        </div>
                      )
@@ -134,48 +133,48 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t py-12 bg-muted/30">
+      <footer className="border-t py-12 bg-muted/30 mt-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="font-bold text-lg mb-4">EventHub</h4>
+              <h4 className="font-bold text-lg mb-4 text-foreground">EventHub</h4>
               <p className="text-sm text-muted-foreground">
                 Your platform for discovering and booking amazing events around the city.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Discover</h4>
+              <h4 className="font-semibold mb-4 text-foreground">Discover</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                 <li><Link href="#" className="hover:text-foreground">Movies</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">Concerts</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">Sports</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">Activities</Link></li>
+                 <li><Link href="/search?category=Movies" className="hover:text-primary transition-colors">Movies</Link></li>
+                 <li><Link href="/search?category=Music" className="hover:text-primary transition-colors">Concerts</Link></li>
+                 <li><Link href="/search?category=Sports" className="hover:text-primary transition-colors">Sports</Link></li>
+                 <li><Link href="/search?category=Activities" className="hover:text-primary transition-colors">Activities</Link></li>
               </ul>
             </div>
              <div>
-              <h4 className="font-semibold mb-4">Support</h4>
+              <h4 className="font-semibold mb-4 text-foreground">Support</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                 <li><Link href="#" className="hover:text-foreground">Contact Us</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">FAQs</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">Terms of Service</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">Privacy Policy</Link></li>
+                 <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
+                 <li><Link href="/faq" className="hover:text-primary transition-colors">FAQs</Link></li>
+                 <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+                 <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Connect</h4>
+              <h4 className="font-semibold mb-4 text-foreground">Connect</h4>
                <ul className="space-y-2 text-sm text-muted-foreground">
-                 <li><Link href="#" className="hover:text-foreground">Facebook</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">Twitter</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">Instagram</Link></li>
-                 <li><Link href="#" className="hover:text-foreground">LinkedIn</Link></li>
+                 <li><Link href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Facebook</Link></li>
+                 <li><Link href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Twitter</Link></li>
+                 <li><Link href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Instagram</Link></li>
+                 <li><Link href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">LinkedIn</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
+          <div className="border-t border-border/50 pt-8 text-center text-sm text-muted-foreground">
             © 2026 EventHub. All rights reserved.
           </div>
         </div>
       </footer>
-    </div>
+    </PageContainer>
   );
 }

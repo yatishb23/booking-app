@@ -1,10 +1,12 @@
 'use client';
 
+import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Menu, User, Sparkles, ChevronDown, MapPin, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AuthModal } from '@/components/auth-modal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,25 +22,14 @@ interface SiteHeaderProps {
 }
 
 export function SiteHeader({ selectedCity, onSelectCity }: SiteHeaderProps) {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
-
-  useEffect(() => {
-    // Check localStorage for user session
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Failed to parse user session");
-      }
-    }
-  }, []);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-    setUser(null);
-    window.location.reload(); 
+    // document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'; // Removed custom cookie logic
+    signOut({ callbackUrl: '/' });
   };
 
   return (
@@ -57,6 +48,7 @@ export function SiteHeader({ selectedCity, onSelectCity }: SiteHeaderProps) {
           
           {/* Location Selector (Always Visible) */}
           <div 
+            // open={false}
             onClick={onSelectCity}
             className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer transition-colors hover:bg-muted/50 px-2 py-1 rounded-md max-w-[120px]"
           >
@@ -74,6 +66,14 @@ export function SiteHeader({ selectedCity, onSelectCity }: SiteHeaderProps) {
                 type="search"
                 placeholder="Search events..."
                 className="h-9 w-full rounded-full border-input bg-muted/40 pl-9 pr-4 text-sm focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm hover:bg-muted/60"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                     const query = (e.target as HTMLInputElement).value;
+                     if (query) {
+                       window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                     }
+                  }
+                }}
               />
             </div>
         </div>
@@ -84,13 +84,13 @@ export function SiteHeader({ selectedCity, onSelectCity }: SiteHeaderProps) {
             <Link href="/dashboard/create-event">ListYourShow</Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="#">Corporates</Link>
+            <Link href="/corporates">Corporates</Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="#">Gift Cards</Link>
+            <Link href="/gift-cards">Gift Cards</Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="#">Offers</Link>
+            <Link href="/offers">Offers</Link>
           </Button>
         </nav>
 
@@ -106,9 +106,9 @@ export function SiteHeader({ selectedCity, onSelectCity }: SiteHeaderProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 pl-2 pr-4 rounded-full h-9 hover:bg-muted font-normal border border-transparent hover:border-input transition-all">
                     <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                      <span className="font-bold text-xs">{user.name.charAt(0).toUpperCase()}</span>
+                      <span className="font-bold text-xs">{(user.name || user.email || 'U').charAt(0).toUpperCase()}</span>
                     </div>
-                    <span className="hidden sm:inline-block text-sm max-w-[100px] truncate">{user.name}</span>
+                    <span className="hidden sm:inline-block text-sm max-w-[100px] truncate">{user.name || user.email}</span>
                     <ChevronDown className="h-3 w-3 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
@@ -122,7 +122,7 @@ export function SiteHeader({ selectedCity, onSelectCity }: SiteHeaderProps) {
                      {/* Assume dashboard is for organizers */}
                     <Link href="/dashboard" className="cursor-pointer w-full">Organizer Dashboard</Link>
                   </DropdownMenuItem>
-                  {user.email.includes('admin') && (
+                  {user.email?.includes('admin') && (
                     <DropdownMenuItem asChild>
                          <Link href="/admin" className="cursor-pointer w-full">Admin Panel</Link>
                     </DropdownMenuItem>
@@ -135,14 +135,14 @@ export function SiteHeader({ selectedCity, onSelectCity }: SiteHeaderProps) {
             </DropdownMenu>
           ) : (
              <div className="flex items-center gap-2">
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">Sign In</Button>
-                </Link>
-                <Link href="/signup">
-                  <Button size="sm">Sign Up</Button>
-                </Link>
+                <Button size="sm" onClick={() => setIsAuthModalOpen(true)}>Sign In</Button>
              </div>
           )}
+           
+          <AuthModal 
+            open={isAuthModalOpen} 
+            onOpenChange={setIsAuthModalOpen} 
+          />
 
            <Button variant="ghost" size="icon" className="md:hidden">
              <Menu className="h-6 w-6" />

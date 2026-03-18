@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { SessionProvider } from "next-auth/react";
 import { SiteHeader } from "@/components/site-header";
 import { CategoryBar } from "@/components/category-bar";
 import { CitySelectorModal } from "@/components/city-selector-modal";
@@ -12,6 +13,7 @@ interface SiteLayoutProps {
 
 function SiteLayoutContent({ children }: SiteLayoutProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedCategory = searchParams.get("category") || "";
 
@@ -28,6 +30,18 @@ function SiteLayoutContent({ children }: SiteLayoutProps) {
     }
   }, []);
 
+  if (
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/register"
+  ) {
+    return (
+      <SessionProvider>
+        {children}
+      </SessionProvider>
+    );
+  }
+
   const handleCitySelect = (city: string) => {
     setSelectedCity(city);
     localStorage.setItem("selectedCity", city);
@@ -36,27 +50,31 @@ function SiteLayoutContent({ children }: SiteLayoutProps) {
 
   const handleSelectCategory = (category: string) => {
     if (category === "All" || category === "") {
-        router.push("/");
+      router.push("/");
     } else {
-        router.push(`/?category=${category}`);
+      router.push(`/?category=${category}`);
     }
   };
 
   return (
-    <>
+    <SessionProvider>
       <SiteHeader
         selectedCity={selectedCity}
         onSelectCity={() => setIsCityModalOpen(true)}
       />
-      <CitySelectorModal open={isCityModalOpen} onSelect={handleCitySelect} />
-      
+      <CitySelectorModal
+        open={isCityModalOpen}
+        onOpenChange={setIsCityModalOpen}
+        onSelect={handleCitySelect}
+      />
+
       <CategoryBar
         selectedCategory={selectedCategory}
         onSelectCategory={handleSelectCategory}
       />
-      
+
       <main className="flex-1">{children}</main>
-    </>
+    </SessionProvider>
   );
 }
 

@@ -110,8 +110,8 @@ export function QRCodeDisplay({
           </div>
         )}
 
-        <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
-          <p className="text-xs text-blue-900 dark:text-blue-100">
+        <div className="p-3 bg-primary/10 dark:bg-primary/20 rounded-lg">
+          <p className="text-xs text-primary dark:text-primary-foreground">
             Save this ticket on your phone. You can also check your email for the ticket details.
           </p>
         </div>

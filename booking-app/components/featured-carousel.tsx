@@ -104,9 +104,11 @@ export function FeaturedCarousel({ events }: FeaturedCarouselProps) {
                    </p>
 
                    <div className="pt-4">
-                      <Button size="lg" className="w-full md:w-auto font-semibold px-8 h-12 text-base shadow-lg hover:shadow-xl transition-all">
-                        Book Now
-                      </Button>
+                      <Link href={`/events/${currentEvent.id}`}>
+                        <Button size="lg" className="w-full md:w-auto font-semibold px-8 h-12 text-base shadow-lg hover:shadow-xl transition-all">
+                          Book Now
+                        </Button>
+                      </Link>
                    </div>
                 </motion.div>
              </div>
